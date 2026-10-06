@@ -76,7 +76,7 @@ export const Footer: React.FC<FooterProps> = ({ onCopyEmail }) => {
         {/* Copyright & Disclaimer */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-slate-400 text-center sm:text-left">
           <div>
-            © {new Date().getFullYear()} Komal Kumari. All projects linked to verified open-source repositories.
+            © {new Date().getFullYear()} Komal Kumari. Project code is available on GitHub.
           </div>
           <div className="flex items-center gap-1 font-semibold text-slate-300">
             <span>Built with React, TypeScript & Tailwind CSS</span>

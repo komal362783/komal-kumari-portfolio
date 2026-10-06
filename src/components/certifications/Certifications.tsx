@@ -13,10 +13,10 @@ export const Certifications: React.FC = () => {
         <ScrollReveal direction="up" distance={25} className="flex flex-col items-start mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-300 text-xs font-mono font-semibold mb-3">
             <Award className="w-3.5 h-3.5" />
-            <span>CREDENTIALS & VERIFICATION</span>
+            <span>CREDENTIALS</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Verified Certifications
+            Certifications
           </h2>
           <p className="text-slate-300 text-sm sm:text-base mt-2 max-w-2xl">
             Formal simulations and industry-recognized foundational certifications validating practical analytics competency.
@@ -64,7 +64,11 @@ export const Certifications: React.FC = () => {
                 <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-mono text-slate-300">
                   <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Verified Completion</span>
+                    {cert.credentialUrl ? (
+                      <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer" className="underline">View Certificate</a>
+                    ) : (
+                      <span className="text-slate-400 font-medium">Certificate link coming soon</span>
+                    )}
                   </div>
                   <span className="text-[10px] text-slate-400 uppercase font-semibold">{cert.badgeType}</span>
                 </div>

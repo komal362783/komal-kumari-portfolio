@@ -34,11 +34,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, index = 0, on
           <Badge variant="emerald" size="sm">
             {project.category}
           </Badge>
+          {project.inProgress && (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 border border-cyan-500/35 text-cyan-300 font-semibold">
+              In Progress
+            </span>
+          )}
 
           {project.isSyntheticData && (
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/35 text-amber-300 flex items-center gap-1 font-semibold">
               <AlertCircle className="w-3 h-3" />
-              <span>Synthetic Dataset</span>
+              <span>{project.dataLabel ?? 'Synthetic Dataset'}</span>
             </span>
           )}
         </div>
