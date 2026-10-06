@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Mail, Phone, MapPin, Send, Copy, Check, Sparkles, MessageSquare, ArrowUpRight } from 'lucide-react';
 import { PERSONAL_INFO } from '../../data/portfolioData';
 import { GithubIcon, LinkedinIcon } from '../ui/Icons';
@@ -8,28 +8,68 @@ interface ContactProps {
   onCopyEmail: () => void;
 }
 
-// Success animation styles (only transform/opacity, so it stays light on phones).
+// Success animation styles (only transform/opacity/filter on a few elements, so it stays light on phones).
 const SUCCESS_CSS = `
-.contact-success { animation: cs-panel 0.4s ease-out both; }
-.cs-badge { animation: cs-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.cs-tick { stroke-dasharray: 24; stroke-dashoffset: 24; animation: cs-draw 0.4s ease-out 0.25s forwards; }
-.cs-ring { animation: cs-ring 0.9s ease-out 0.2s both; }
-.cs-dot { opacity: 0; animation: cs-burst 0.8s ease-out 0.3s both; }
-.cs-text { animation: cs-rise 0.4s ease-out both; }
-@keyframes cs-panel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes cs-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.contact-success { position: relative; overflow: hidden; animation: cs-panel 0.45s ease-out both; box-shadow: 0 0 40px -8px rgba(52, 211, 153, 0.45), inset 0 0 40px -20px rgba(34, 211, 238, 0.4); }
+.cs-glow { position: absolute; left: 50%; top: 70px; width: 220px; height: 220px; margin: -110px 0 0 -110px; border-radius: 9999px; background: radial-gradient(circle, rgba(52,211,153,0.45) 0%, rgba(34,211,238,0.18) 45%, transparent 70%); animation: cs-glow 2.4s ease-in-out infinite; pointer-events: none; }
+.cs-badge { animation: cs-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; box-shadow: 0 0 0 4px rgba(52,211,153,0.15), 0 0 28px 6px rgba(52,211,153,0.65); }
+.cs-tick { stroke-dasharray: 24; stroke-dashoffset: 24; animation: cs-draw 0.5s ease-out 0.35s forwards; filter: drop-shadow(0 0 4px rgba(110,231,183,0.9)); }
+.cs-ring { animation: cs-ring 1.1s ease-out 0.25s both; }
+.cs-ring2 { animation: cs-ring 1.1s ease-out 0.55s both; }
+.cs-dot { opacity: 0; animation: cs-burst 0.95s ease-out 0.35s both; }
+.cs-spark { position: absolute; opacity: 0; color: #fde68a; filter: drop-shadow(0 0 4px rgba(253,230,138,0.9)); animation: cs-twinkle 1.8s ease-in-out infinite; pointer-events: none; }
+.cs-text { animation: cs-rise 0.5s ease-out both; }
+.cs-title { background: linear-gradient(90deg, #6ee7b7, #67e8f9, #fde68a, #6ee7b7); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: cs-rise 0.5s ease-out both, cs-shine 3s linear infinite; }
+@keyframes cs-panel { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes cs-pop { 0% { transform: scale(0.2); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes cs-draw { to { stroke-dashoffset: 0; } }
-@keyframes cs-ring { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(2); opacity: 0; } }
-@keyframes cs-burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-36px) scale(0.4); } }
+@keyframes cs-ring { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(2.6); opacity: 0; } }
+@keyframes cs-burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-56px) scale(0.4); } }
+@keyframes cs-twinkle { 0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(45deg); } }
+@keyframes cs-glow { 0%, 100% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.08); } }
+@keyframes cs-shine { to { background-position: 250% 0; } }
 @keyframes cs-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .contact-success, .cs-badge, .cs-text { animation: none; }
+  .contact-success, .cs-badge, .cs-text, .cs-glow { animation: none; }
+  .cs-title { animation: none; background-position: 0 0; }
   .cs-tick { animation: none; stroke-dashoffset: 0; }
-  .cs-ring, .cs-dot { display: none; }
+  .cs-ring, .cs-ring2, .cs-dot { display: none; }
+  .cs-spark { animation: none; opacity: 0.8; transform: none; }
 }
 `;
 
+const CONFETTI_COLORS = ['#34d399', '#2dd4bf', '#22d3ee', '#fde047', '#f472b6', '#a78bfa', '#fb923c'];
+
+// Fires a colourful confetti burst. Skipped when the visitor prefers reduced motion.
+const fireConfetti = async (canvas: HTMLCanvasElement) => {
+  if (typeof window === 'undefined') return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  try {
+    const { default: confetti } = await import('canvas-confetti');
+    if (!canvas.isConnected) return;
+    const burst = confetti.create(canvas, { resize: true, disableForReducedMotion: true });
+    const small = window.innerWidth < 640;
+    const base = { colors: CONFETTI_COLORS, zIndex: 9999, disableForReducedMotion: true, ticks: 200 };
+    burst({ ...base, particleCount: small ? 60 : 110, spread: 85, startVelocity: 48, origin: { x: 0.5, y: 0.6 } });
+    setTimeout(() => canvas.isConnected && burst({ ...base, particleCount: small ? 25 : 45, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } }), 250);
+    setTimeout(() => canvas.isConnected && burst({ ...base, particleCount: small ? 25 : 45, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } }), 250);
+  } catch {
+    // Confetti is decoration only; ignore failures.
+  }
+};
+
+const SPARKLES: { left: string; top: string; size: number; delay: string }[] = [
+  { left: '8%', top: '14%', size: 18, delay: '0s' },
+  { left: '88%', top: '10%', size: 22, delay: '0.4s' },
+  { left: '16%', top: '62%', size: 14, delay: '0.9s' },
+  { left: '82%', top: '58%', size: 16, delay: '0.2s' },
+  { left: '50%', top: '6%', size: 12, delay: '1.1s' },
+  { left: '30%', top: '32%', size: 12, delay: '0.7s' },
+  { left: '70%', top: '34%', size: 14, delay: '1.4s' },
+];
+
 export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -41,6 +81,10 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     subject: '',
     message: '',
   });
+
+  useEffect(() => {
+    if (formSubmitted && confettiCanvasRef.current) fireConfetti(confettiCanvasRef.current);
+  }, [formSubmitted]);
 
   const handleCopyEmail = () => {
     onCopyEmail();
@@ -209,25 +253,42 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
               </div>
 
               {formSubmitted ? (
-                <div className="contact-success p-8 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-center space-y-3" role="status" aria-live="polite">
+                <div className="contact-success p-8 rounded-xl bg-emerald-950/40 border border-emerald-400/50 text-center space-y-3" role="status" aria-live="polite">
                   <style>{SUCCESS_CSS}</style>
-                  <div className="relative w-14 h-14 mx-auto flex items-center justify-center">
-                    <span className="cs-ring absolute inset-0 rounded-full border border-emerald-400/60" />
-                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <canvas ref={confettiCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />
+                  <span className="cs-glow" aria-hidden="true" />
+                  {SPARKLES.map((sp, i) => (
+                    <svg
+                      key={i}
+                      viewBox="0 0 24 24"
+                      className="cs-spark"
+                      style={{ left: sp.left, top: sp.top, width: sp.size, height: sp.size, animationDelay: sp.delay }}
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z" />
+                    </svg>
+                  ))}
+                  <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+                    <span className="cs-ring absolute inset-0 rounded-full border-2 border-emerald-400/70" />
+                    <span className="cs-ring2 absolute inset-0 rounded-full border-2 border-cyan-300/60" />
+                    {Array.from({ length: 14 }, (_, i) => (
                       <span
                         key={i}
-                        className="cs-dot absolute left-1/2 top-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-emerald-300"
-                        style={{ '--a': `${i * 45}deg` } as React.CSSProperties}
+                        className="cs-dot absolute left-1/2 top-1/2 w-2 h-2 -ml-1 -mt-1 rounded-full"
+                        style={{ '--a': `${i * (360 / 14)}deg`, backgroundColor: CONFETTI_COLORS[i % CONFETTI_COLORS.length] } as React.CSSProperties}
                       />
                     ))}
-                    <div className="cs-badge w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <div className="cs-badge relative w-[72px] h-[72px] rounded-full bg-emerald-500/25 text-emerald-300 flex items-center justify-center border border-emerald-300/60">
+                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <path className="cs-tick" d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
                     </div>
                   </div>
-                  <h4 className="cs-text text-lg font-extrabold text-white" style={{ animationDelay: '0.35s' }}>Message sent</h4>
-                  <p className="cs-text text-xs text-slate-200 max-w-md mx-auto leading-relaxed" style={{ animationDelay: '0.45s' }}>
+                  <h4 className="cs-title text-xl sm:text-2xl font-extrabold" style={{ animationDelay: '0.4s, 0s' }}>
+                    Congratulations! Your message has been sent.
+                  </h4>
+                  <p className="cs-text text-xs sm:text-sm text-slate-100 max-w-md mx-auto leading-relaxed" style={{ animationDelay: '0.55s' }}>
                     Thanks, <span className="text-emerald-300 font-bold">{formData.name}</span>! Your message has been sent and I will get back to you soon. You can also email Komal directly at{' '}
                     <a href={`mailto:${PERSONAL_INFO.email}`} className="text-emerald-400 underline font-bold">
                       {PERSONAL_INFO.email}
@@ -239,7 +300,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                       setFormData({ name: '', email: '', subject: '', message: '' });
                     }}
                     className="cs-text mt-4 px-4 py-2 rounded-lg bg-[#141C30] border border-slate-700 text-xs font-mono text-slate-200 hover:text-white cursor-pointer"
-                    style={{ animationDelay: '0.55s' }}
+                    style={{ animationDelay: '0.7s' }}
                   >
                     Send Another Note
                   </button>
@@ -330,5 +391,6 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     </section>
   );
 };
+
 
 
