@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Copy, Check, Sparkles, MessageSquare, ArrowUpRight } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { PERSONAL_INFO } from '../../data/portfolioData';
 import { GithubIcon, LinkedinIcon } from '../ui/Icons';
 import { ScrollReveal } from '../ui/ScrollReveal';
@@ -36,12 +35,10 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
 
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.7 },
-      colors: ['#10B981', '#06B6D4', '#34D399', '#F8FAFC'],
-    });
+    // No server: open the visitor's email app with the message pre-filled.
+    const subject = formData.subject || `Portfolio message from ${formData.name}`;
+    const body = `${formData.message}\n\nFrom: ${formData.name} (${formData.email})`;
+    window.location.href = `mailto:${PERSONAL_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
     setFormSubmitted(true);
   };
@@ -167,7 +164,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                 </div>
                 <div>
                   <h3 className="text-lg font-extrabold text-white">Send Direct Message</h3>
-                  <p className="text-xs text-slate-300">Fastest response within 24 hours</p>
+                  <p className="text-xs text-slate-300">Not sent yet - please press Send in your email app</p>
                 </div>
               </div>
 
@@ -176,9 +173,9 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                   <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/30">
                     <Check className="w-6 h-6" />
                   </div>
-                  <h4 className="text-lg font-extrabold text-white">Message Prepared!</h4>
+                  <h4 className="text-lg font-extrabold text-white">Almost done - press Send in your email app</h4>
                   <p className="text-xs text-slate-200 max-w-md mx-auto leading-relaxed">
-                    Thank you, <span className="text-emerald-300 font-bold">{formData.name}</span>! You can also reach Komal directly at{' '}
+                    Thanks, <span className="text-emerald-300 font-bold">{formData.name}</span>! Your email app should have opened with the message ready. It is <b>not sent</b> until you press Send there. If nothing opened, email Komal directly at{' '}
                     <a href={`mailto:${PERSONAL_INFO.email}`} className="text-emerald-400 underline font-bold">
                       {PERSONAL_INFO.email}
                     </a>.
@@ -257,7 +254,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                     className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.99] cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Send Message</span>
+                    <span>Open in Email App</span>
                   </button>
                 </form>
               )}

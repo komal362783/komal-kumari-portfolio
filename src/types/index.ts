@@ -8,6 +8,8 @@ export interface Project {
   keyCapabilities: string[];
   githubUrl: string;
   isSyntheticData?: boolean;
+  dataLabel?: string;
+  inProgress?: boolean;
   caseStudy: {
     problem: string;
     approach: string[];
@@ -53,6 +55,7 @@ export interface Certification {
   date: string;
   badgeType: 'enterprise' | 'technical' | 'foundational';
   verificationNote?: string;
+  credentialUrl?: string;
 }
 
 export interface PipelineStep {

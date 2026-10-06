@@ -132,6 +132,15 @@ export const Hero: React.FC<HeroProps> = ({ onCopyEmail }) => {
               </a>
 
               <a
+                href={PERSONAL_INFO.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#0E1422] border border-emerald-500/50 text-emerald-200 hover:text-white hover:border-emerald-300 hover:bg-[#141C30] text-sm font-semibold transition-all hover:-translate-y-0.5"
+              >
+                <span>View Resume</span>
+              </a>
+
+              <a
                 href={PERSONAL_INFO.github}
                 target="_blank"
                 rel="noopener noreferrer"

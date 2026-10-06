@@ -18,6 +18,7 @@ export const PERSONAL_INFO = {
     expectedGraduation: "2027",
   },
   bio: "I am a Computer Science Engineering student focused on Data Analytics and practical data-driven problem solving. I enjoy transforming raw data into meaningful insights through Python, SQL, Excel, Power BI and data visualization.",
+  resumeUrl: "/Komal_Kumari_Resume.pdf", // put your resume PDF in the public/ folder with this exact name
   heroSkills: ["Python", "SQL", "Excel", "Power BI", "Data Visualization"]
 };
 
@@ -140,6 +141,8 @@ export const PROJECTS_DATA: Project[] = [
       "Actionable Executive Recommendations"
     ],
     githubUrl: "https://github.com/komal362783/Business-Performance-360-Dashboard",
+    isSyntheticData: true,
+    dataLabel: "Fictional / Synthetic Data",
     caseStudy: {
       problem: "Organizations often possess raw transactional and operational records across disparate tables, making it difficult for management to quickly track holistic revenue velocity, product margins, and regional sales distribution in one single view.",
       approach: [
@@ -209,6 +212,8 @@ export const PROJECTS_DATA: Project[] = [
       "Dynamic Multi-Chart Streamlit Dashboard"
     ],
     githubUrl: "https://github.com/komal362783/CodeAlpha_EcommerceSalesDataVisualization",
+    isSyntheticData: true,
+    dataLabel: "Synthetic Data",
     caseStudy: {
       problem: "E-commerce retailers need granular clarity on which products, regions, and seasonal time windows drive peak sales volume, alongside identifying customer segments with high order value.",
       approach: [
@@ -243,6 +248,8 @@ export const PROJECTS_DATA: Project[] = [
       "Statistical Distribution & Outlier Detection"
     ],
     githubUrl: "https://github.com/komal362783/CodeAlpha_Superstore_EDA",
+    isSyntheticData: true,
+    dataLabel: "Synthetic Superstore-style Data",
     caseStudy: {
       problem: "In retail operations, aggressive discount strategies often drive high revenue numbers on paper while severely eroding actual operating profit margins.",
       approach: [
@@ -293,6 +300,39 @@ export const PROJECTS_DATA: Project[] = [
       ],
       insights: [
         "Demonstrated capability in building custom data ingestion pipelines from scratch when no structured API exists."
+      ]
+    }
+  },
+  {
+    id: "insightai-in-progress",
+    title: "InsightAI - Business Analytics Dashboard",
+    category: "In Progress - Full-Stack Analytics",
+    filterTags: ["Python", "SQL", "Visualization"],
+    shortDescription: "A React + FastAPI + PostgreSQL analytics dashboard I am building: upload a sales CSV, store it in a database and view sales analytics. AI insights are planned for the next phase.",
+    technologies: ["React", "Vite", "FastAPI", "Python", "PostgreSQL"],
+    keyCapabilities: [
+      "In progress: CSV upload and sales analytics",
+      "Planned: AI-generated insights (next phase)",
+      "Currently uses sample data, not a real dataset"
+    ],
+    githubUrl: "https://github.com/komal362783/InsightAI-Frontend",
+    isSyntheticData: true,
+    dataLabel: "Sample Data",
+    inProgress: true,
+    caseStudy: {
+      problem: "Business owners often have sales data in spreadsheets but no quick way to see which products and regions drive revenue. InsightAI is my attempt to make that a few clicks.",
+      approach: [
+        "Frontend: React + Vite dashboard (the public repo currently holds the interface only).",
+        "Backend: FastAPI + PostgreSQL for CSV upload and sales queries (being built, not yet on GitHub).",
+        "Next: replace sample data with a cleaned public dataset and add charts."
+      ],
+      tools: ["React", "Vite", "FastAPI", "PostgreSQL"],
+      analysisHighlights: [
+        "Status: work in progress. Nothing here is a finished feature yet.",
+        "The linked repository is the frontend only."
+      ],
+      insights: [
+        "No analytical findings yet. They will be added once real data is loaded."
       ]
     }
   }
@@ -384,6 +424,6 @@ export const CERTIFICATIONS_DATA: Certification[] = [
     issuer: "Oracle",
     date: "Certified",
     badgeType: "foundational",
-    verificationNote: "Verified core comprehension of database concepts, cloud infrastructure principles, and enterprise information architectures."
+    verificationNote: "Covers core database concepts, cloud infrastructure principles, and enterprise information architectures."
   }
 ];

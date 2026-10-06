@@ -62,7 +62,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
               {project.isSyntheticData && (
                 <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 flex items-center gap-1 font-semibold">
                   <AlertCircle className="w-3 h-3" />
-                  <span>Synthetic Dataset (Labeled)</span>
+                  <span>{project.dataLabel ?? 'Synthetic Dataset'} (Labeled)</span>
                 </span>
               )}
             </div>

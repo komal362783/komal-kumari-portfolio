@@ -248,7 +248,7 @@ export const DataSandbox: React.FC = () => {
                       <Table className="w-4 h-4 text-emerald-400" />
                       <span>Result Set ({selectedSqlExample.resultRows.length} rows returned)</span>
                     </div>
-                    <span className="text-[11px] text-emerald-400 font-mono font-semibold">14ms query speed</span>
+                    <span className="text-[11px] text-emerald-400 font-mono font-semibold">Simulated result (demo)</span>
                   </div>
 
                   <div className="overflow-x-auto rounded-xl border border-slate-700">
