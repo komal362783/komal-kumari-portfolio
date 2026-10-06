@@ -12,6 +12,8 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,16 +33,33 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     setTimeout(() => setCopiedPhone(false), 2000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
+    if (!formData.name || !formData.email || !formData.message || sending) return;
 
-    // No server: open the visitor's email app with the message pre-filled.
-    const subject = formData.subject || `Portfolio message from ${formData.name}`;
-    const body = `${formData.message}\n\nFrom: ${formData.name} (${formData.email})`;
-    window.location.href = `mailto:${PERSONAL_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    setFormSubmitted(true);
+    setSending(true);
+    setSendError('');
+    try {
+      const res = await fetch('https://formspree.io/f/xyekkzbg', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject || `Portfolio message from ${formData.name}`,
+          message: formData.message,
+        }),
+      });
+      if (res.ok) {
+        setFormSubmitted(true);
+      } else {
+        setSendError('Could not send your message. Please try again or email me directly.');
+      }
+    } catch {
+      setSendError('Network problem. Please try again or email me directly.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -164,7 +183,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                 </div>
                 <div>
                   <h3 className="text-lg font-extrabold text-white">Send Direct Message</h3>
-                  <p className="text-xs text-slate-300">Not sent yet - please press Send in your email app</p>
+                  <p className="text-xs text-slate-300">Your message goes straight to my inbox</p>
                 </div>
               </div>
 
@@ -173,9 +192,9 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                   <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/30">
                     <Check className="w-6 h-6" />
                   </div>
-                  <h4 className="text-lg font-extrabold text-white">Almost done - press Send in your email app</h4>
+                  <h4 className="text-lg font-extrabold text-white">Message sent</h4>
                   <p className="text-xs text-slate-200 max-w-md mx-auto leading-relaxed">
-                    Thanks, <span className="text-emerald-300 font-bold">{formData.name}</span>! Your email app should have opened with the message ready. It is <b>not sent</b> until you press Send there. If nothing opened, email Komal directly at{' '}
+                    Thanks, <span className="text-emerald-300 font-bold">{formData.name}</span>! Your message has been sent and I will get back to you soon. You can also email Komal directly at{' '}
                     <a href={`mailto:${PERSONAL_INFO.email}`} className="text-emerald-400 underline font-bold">
                       {PERSONAL_INFO.email}
                     </a>.
@@ -200,6 +219,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                       <input
                         type="text"
                         required
+                        name="name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. Alex Smith"
@@ -214,6 +234,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                       <input
                         type="email"
                         required
+                        name="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="alex@company.com"
@@ -228,7 +249,8 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                     </label>
                     <input
                       type="text"
-                      value={formData.subject}
+                      name="subject"
+                        value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       placeholder="e.g. Data Analytics Intern Opportunity"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-[#090D16] border border-slate-700 focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition-colors"
@@ -242,6 +264,7 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                     <textarea
                       required
                       rows={4}
+                      name="message"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       placeholder="Hi Komal, I reviewed your analytics projects and would like to discuss..."
@@ -249,12 +272,17 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                     />
                   </div>
 
+                  {sendError && (
+                    <p role="alert" className="text-xs text-red-300 font-semibold">{sendError}</p>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.99] cursor-pointer"
+                    disabled={sending}
+                    className="disabled:opacity-60 w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-cyan-300 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.99] cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Open in Email App</span>
+                    <span>{sending ? 'Sending...' : 'Send Message'}</span>
                   </button>
                 </form>
               )}
@@ -267,3 +295,4 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     </section>
   );
 };
+
