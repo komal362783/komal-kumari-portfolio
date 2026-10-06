@@ -8,6 +8,27 @@ interface ContactProps {
   onCopyEmail: () => void;
 }
 
+// Success animation styles (only transform/opacity, so it stays light on phones).
+const SUCCESS_CSS = `
+.contact-success { animation: cs-panel 0.4s ease-out both; }
+.cs-badge { animation: cs-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.cs-tick { stroke-dasharray: 24; stroke-dashoffset: 24; animation: cs-draw 0.4s ease-out 0.25s forwards; }
+.cs-ring { animation: cs-ring 0.9s ease-out 0.2s both; }
+.cs-dot { opacity: 0; animation: cs-burst 0.8s ease-out 0.3s both; }
+.cs-text { animation: cs-rise 0.4s ease-out both; }
+@keyframes cs-panel { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes cs-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes cs-draw { to { stroke-dashoffset: 0; } }
+@keyframes cs-ring { from { transform: scale(0.8); opacity: 0.9; } to { transform: scale(2); opacity: 0; } }
+@keyframes cs-burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-36px) scale(0.4); } }
+@keyframes cs-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .contact-success, .cs-badge, .cs-text { animation: none; }
+  .cs-tick { animation: none; stroke-dashoffset: 0; }
+  .cs-ring, .cs-dot { display: none; }
+}
+`;
+
 export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
@@ -188,12 +209,25 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
               </div>
 
               {formSubmitted ? (
-                <div className="p-8 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/30">
-                    <Check className="w-6 h-6" />
+                <div className="contact-success p-8 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-center space-y-3" role="status" aria-live="polite">
+                  <style>{SUCCESS_CSS}</style>
+                  <div className="relative w-14 h-14 mx-auto flex items-center justify-center">
+                    <span className="cs-ring absolute inset-0 rounded-full border border-emerald-400/60" />
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                      <span
+                        key={i}
+                        className="cs-dot absolute left-1/2 top-1/2 w-1.5 h-1.5 -ml-[3px] -mt-[3px] rounded-full bg-emerald-300"
+                        style={{ '--a': `${i * 45}deg` } as React.CSSProperties}
+                      />
+                    ))}
+                    <div className="cs-badge w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path className="cs-tick" d="M5 12.5l4.5 4.5L19 7.5" />
+                      </svg>
+                    </div>
                   </div>
-                  <h4 className="text-lg font-extrabold text-white">Message sent</h4>
-                  <p className="text-xs text-slate-200 max-w-md mx-auto leading-relaxed">
+                  <h4 className="cs-text text-lg font-extrabold text-white" style={{ animationDelay: '0.35s' }}>Message sent</h4>
+                  <p className="cs-text text-xs text-slate-200 max-w-md mx-auto leading-relaxed" style={{ animationDelay: '0.45s' }}>
                     Thanks, <span className="text-emerald-300 font-bold">{formData.name}</span>! Your message has been sent and I will get back to you soon. You can also email Komal directly at{' '}
                     <a href={`mailto:${PERSONAL_INFO.email}`} className="text-emerald-400 underline font-bold">
                       {PERSONAL_INFO.email}
@@ -204,7 +238,8 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
                       setFormSubmitted(false);
                       setFormData({ name: '', email: '', subject: '', message: '' });
                     }}
-                    className="mt-4 px-4 py-2 rounded-lg bg-[#141C30] border border-slate-700 text-xs font-mono text-slate-200 hover:text-white cursor-pointer"
+                    className="cs-text mt-4 px-4 py-2 rounded-lg bg-[#141C30] border border-slate-700 text-xs font-mono text-slate-200 hover:text-white cursor-pointer"
+                    style={{ animationDelay: '0.55s' }}
                   >
                     Send Another Note
                   </button>
@@ -295,4 +330,5 @@ export const Contact: React.FC<ContactProps> = ({ onCopyEmail }) => {
     </section>
   );
 };
+
 
